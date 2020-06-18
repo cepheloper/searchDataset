@@ -9,46 +9,43 @@ from selenium.webdriver import Firefox
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
 
-#%% Set Browser 
-opts = Options()
-opts.set_headless()
-assert opts.headless  # Operating in headless mode
-browser = Firefox(options=opts)
-browser = Firefox()
+class displaySearch():
+    '''Display csv datasets from listed websites based on the search term''' 
 
-#%% Set URL
-search_term = 'baseball'
-url = 'https://www.kaggle.com/datasets?search='+search_term
-browser.get(url) 
-datasets_links = [] #top level 
-
-#%% Search by Absolute XPath 
-xpath_i = "/html/body/main/div[1]/div/div[5]/div[2]/div[2]/div[2]/div[1]/div/ul/li/a"
-elems = browser.find_elements_by_xpath(xpath_i)
-#elems = browser.find_elements(By.TAG_NAME, 'a') #this fetch all a links 
-for elem in elems:
-    href = elem.get_attribute('href')
-    if href is not None:
-        datasets_links.append(href)
-
-#%% Test URLs
-url_select1 = "https://www.kaggle.com/seanlahman/the-history-of-baseball" #test example1 
-url_select2 = "https://www.kaggle.com/open-source-sports/baseball-databank" #test example2 
-
-# %% Click to donwload 
-#browser.get(url_select1) 
-#xpath_download = "/html/body/main/div[1]/div/div[5]/div[2]/div[1]/div/div/div[2]/div[2]/div[1]/div[2]/a[1]/div/span"
-#browser.find_elements_by_xpath(xpath_download).click()
-
-# %% URL to download 1
-browser.get(url_select1) 
-browser.get(url_select1+'/download') #can only download if you signed in 
+    def __init__(self,keyword):
+        self.term = keyword
+        self.browser = browserStart()
 
 
-# %% URL to download 2 
-browser.get(url_select2) 
-browser.get(url_select2+'/download') #can only download if you signed in 
+    @staticmethod
+    def browserStart():
+        '''Start Firefox browser in headless mode'''
+        opts = Options()
+        opts.headless = True
+        browser = Firefox(options=opts)
+        return browser
 
+    def __kaggleSearch(term = None, browser = self.browser): 
+        '''Search for csv datasets on Kaggle and return a list of hyperlinks'''
+        kgl_links = []
+        kgl_xpath = '//ul/li/a'
+        kgl_url = 'https://www.kaggle.com/datasets?search='+str(term)
+        browser.get(kgl_url)
+        kgl_elems = browser.find_elements_by_xpath(kgl_xpath)
+        for elems in kgl_elems:
+            kgl_links.append(elems.get_attribute('href'))
+        return kgl_links
 
-#%% Ideas 
-# Not a lot of site has csv ready format - might be good to display the dataformat that they have.
+    def __awsSearch(term = None, browser = self.browser): 
+        '''Search for csv datasets on AWS and return a list of hyperlinks'''
+        aws_links = []
+        aws_url = 'https://registry.opendata.aws/'
+        browser.get(aws_url)
+        browser.find_element_by_xpath('//*[@id="search-box"]').send_keys(term)
+        aws_xpath = '//div[contains(@class,"dataset") and not(@style="display:none;")]/*/a'
+        aws_elems = browser.find_elements_by_xpath(xpath_aws)
+        for elems in aws_links:
+            if elems.text != '': #the site hides links which is not relevant to the search 
+                aws_links.append(links.get_attribute('href')) 
+        return aws_links
+
