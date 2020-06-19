@@ -13,9 +13,13 @@ class displaySearch():
     '''Display csv datasets from listed websites based on the search term''' 
 
     def __init__(self,keyword):
-        self.term = keyword
         self.browser = browserStart()
-
+        kgl_info = __kaggleSearch(term = keyword)
+        aws_info = __awsSearch(term = keyword)
+        for links in kgl_info:
+            print(links)
+        for links in aws_info:
+            print(links)
 
     @staticmethod
     def browserStart():
