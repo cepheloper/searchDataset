@@ -8,8 +8,20 @@ from selenium.webdriver.common.by import By
 class displaySearch():
     '''Display csv datasets from listed websites based on the search term''' 
 
-    def __init__(self):
-        pass
+    def __init__(self, keyword):
+        logger = logging.getLogger('ds_device')
+        self.keyword = keyword
+        self.browser = self.browserStart()
+        logger.info('Browser Started ')
+        try:
+            kgl_info = self.__kaggleSearch(term = self.keyword)
+            aws_info = self.__awsSearch(term = self.keyword)
+            for links in kgl_info:
+                print(links)
+            for links in aws_info:
+                print(links)
+        except Exception:
+            logger.exception("Error in displaySearch")
 
     @staticmethod
     def browserStart():
@@ -47,18 +59,3 @@ class displaySearch():
                 aws_links.append(elems.get_attribute('href')) 
         return aws_links
 
-    def main(self, keyword):
-        logger = logging.getLogger('ds_device')
-        self.keyword = keyword
-        self.browser = self.browserStart()
-        logger.info('Browser Started - logging')
-        print('Browser Started')
-        try:
-            kgl_info = self.__kaggleSearch(term = self.keyword)
-            aws_info = self.__awsSearch(term = self.keyword)
-            for links in kgl_info:
-                print(links)
-            for links in aws_info:
-                print(links)
-        except Exception:
-            logger.exception("Error in displaySearch")

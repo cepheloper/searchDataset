@@ -14,8 +14,7 @@ from scraper import displaySearch
 
 def searchDataset():
     keyword = 'covid'
-    dsr = displaySearch() #Initiate search class 
-    dsr.main(keyword)
+    displaySearch(keyword) #Initiate search class 
 
 if __name__ == '__main__':
     print('Commencing Search')
