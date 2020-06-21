@@ -9,10 +9,9 @@ class displaySearch():
     '''Display csv datasets from listed websites based on the search term''' 
 
     def __init__(self, keyword):
-        logger = logging.getLogger('ds_device')
+        self.logger = self.initLogger()
         self.keyword = keyword
         self.browser = self.browserStart()
-        logger.info('Browser Started ')
         try:
             kgl_info = self.__kaggleSearch(term = self.keyword)
             aws_info = self.__awsSearch(term = self.keyword)
@@ -22,6 +21,18 @@ class displaySearch():
                 print(links)
         except Exception:
             logger.exception("Error in displaySearch")
+
+    @staticmethod
+    def initLogger():
+        '''Initiate the log to record activity from info level'''
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.INFO)
+        # define file handler and set formatter
+        file_handler = logging.FileHandler('ds_device.log')
+        formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')      
+        file_handler.setFormatter(formatter)  
+        logger.addHandler(file_handler) # add file handler to logger
+        return logger
 
     @staticmethod
     def browserStart():
