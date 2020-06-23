@@ -1,0 +1,5 @@
+# In here, the ctrl+alt+n (run code) and run file in terminal seems to use a diff python env; better to run in terminal for the correct env 
+# this current directory has git repo in it , but to push to github - just used git bash and push to origin u master 
+# ctrl + / to comment and uncomment quickly 
+# If a foo.py python file is execute directly - then its __name__ attribute is __main__, however if the file is imported, its name would be foo.py 
+# Need to create __init__.py for the python to recognize the py files and the packages 
