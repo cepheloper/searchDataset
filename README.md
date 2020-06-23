@@ -1,1 +1,0 @@
-ds_device dev v1.0
