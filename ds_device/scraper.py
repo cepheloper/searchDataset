@@ -90,8 +90,7 @@ class displaySearch():
                     self.logger.error('Connection to {urlx} cannot be established'.format(urlx = url))
 
 
-class downloadData():
-    '''Download datasets from the search results'''
+class utils():
 
     def __init__(self):
         pass
