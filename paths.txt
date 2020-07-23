@@ -1,0 +1,6 @@
+kgl_xpath***//ul/li/a
+kgl_url***https://www.kaggle.com/datasets
+kgl_box***//input[contains(@class,"MuiInputBase-input")]
+aws_url***https://registry.opendata.aws/
+aws_xpath***//div[contains(@class,"dataset") and not(@style="display:none;")]/*/a
+aws_box***//*[@id="search-box"]

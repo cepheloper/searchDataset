@@ -28,16 +28,22 @@ class mainApp(tk.Frame):
     def downloadResults(self):
         if self.listbox.curselection():
             downloadLink = self.listbox.get(self.listbox.curselection())
+            self.searchData.downloadKaggle(link = downloadLink)
         else: messagebox.showerror(title = "Null Error",message = "Dataset not selected")
 
     def clearSearch(self):
         self.listbox.delete(0, tk.END)
 
     def commenceSearch(self): 
-        keyword = "Covid"
-        searchData = displaySearch(keyword)
+        self.clearSearch()
+        keyword = self.searchbar.get()
+        try:
+            self.searchData = displaySearch(keyword)
+            results = self.searchData.retrieveLinks()
+            self.listbox.insert("end",*results) 
+        except AttributeError as error: 
+            messagebox.showerror(title = error,message = "Cannot retrieve links at this time")
         
-        self.listbox.insert("end",*results) 
             
 
         

@@ -1,28 +1,40 @@
 #%% Import libraries 
 import logging  
+import requests
 from selenium.webdriver import Firefox
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver import FirefoxProfile
 
 class displaySearch():
     '''Display csv datasets from listed websites based on the search term''' 
 
     def __init__(self, keyword):
-        self.logger = self.initLogger()
+        self.logger = self.__initLogger()
         self.keyword = keyword
-        self.browser = self.browserStart()
-
+        self.browser = self.__browserStart()
+        self.initPaths()
+        self.checkUrl()
 
     def retrieveLinks(self):
-        try:
-            self.kgl_info = self.__kaggleSearch(term = self.keyword)
-            self.aws_info = self.__awsSearch(term = self.keyword)
-            self.writeOutput(*self.kgl_info,*self.aws_info)
+        '''Search datasets on different websites. Paths.txt must be filled to utilize the attributes'''
+        try: #Add paths to search in the following format 
+            self.kgl_info = self.__Search(term = self.keyword, url = self.kgl_url, linksPath = self.kgl_xpath, searchBoxPath = self.kgl_box)
+            self.aws_info = self.__Search(term = self.keyword, url = self.aws_url, linksPath = self.aws_xpath, searchBoxPath = self.aws_box)
         except Exception:
             self.logger.exception("Error in displaySearch")
-        return [*self.kgl_info, *self.aws_info] 
+        return [*self.kgl_info, *self.aws_info] # Do not forget to return the values after paths are added 
+
+    def initPaths(self):
+        self.urls = []
+        with open("paths.txt", encoding='utf-8') as f:
+            for line in f:
+                key, value = line.rstrip("\n").split("***")
+                setattr(self, key, value)
+                if 'url' in key: 
+                    self.urls.append(value)
 
     @staticmethod
-    def initLogger():
+    def __initLogger():
         '''Initiate the log to record activity from info level'''
         logger = logging.getLogger(__name__)
         logger.setLevel(logging.INFO)
@@ -33,7 +45,7 @@ class displaySearch():
         return logger
 
     @staticmethod
-    def browserStart():
+    def __browserStart():
         opts = Options()
         opts.headless = True
         browser = Firefox(options=opts)
@@ -47,43 +59,36 @@ class displaySearch():
             outs.write("\n")
         outs.close
 
-    def browserProfile():
-        '''Apply browser profile to set download dir and disable dialogue box'''
-        pass
-
-    def __kaggleSearch(self, term = None, browser = None ): 
-        '''Search for csv datasets on Kaggle and return a list of hyperlinks'''
-        self.logger.info("Running __kaggleSearch")    
+    def __Search(self, url, searchBoxPath, linksPath, term = None, browser = None ):
+        self.logger.info("Running search on {website}".format(website = url)) 
         if not browser:
             browser = self.browser
-        kgl_links = []
-        kgl_xpath = '//ul/li/a' #This is the x-path format to retrieve the hyperlinks on Kaggle
-        kgl_url = 'https://www.kaggle.com/datasets'
-        browser.get(kgl_url)
-        search_box = '//input[contains(@class,"MuiInputBase-input")]'
-        browser.find_element_by_xpath(search_box).send_keys(term)
-        kgl_elems = browser.find_elements_by_xpath(kgl_xpath)
-        for elems in kgl_elems:
-            kgl_links.append(elems.get_attribute('href'))
-        self.logger.info("__kaggleSearch returns {numResults} results".format(numResults = len(kgl_links)))
-        return kgl_links
+        searchResults = []
+        browser.get(url)
+        browser.find_element_by_xpath(searchBoxPath).send_keys(term)
+        elements = browser.find_elements_by_xpath(linksPath)
+        for elems in elements:
+            searchResults.append(elems.get_attribute('href'))
+        self.logger.info("Search on {searchTitle} returns {numResults} results".format(searchTitle = url, numResults = len(searchResults)))
+        return searchResults
 
-    def __awsSearch(self, term = None, browser = None): 
-        '''Search for csv datasets on AWS and return a list of hyperlinks'''
-        self.logger.info("Running __awsSearch")
-        if not browser:
+    def downloadKaggle(self,link,browser = None):
+        if not browser: 
             browser = self.browser
-        aws_links = []
-        aws_url = 'https://registry.opendata.aws/'
-        browser.get(aws_url)
-        browser.find_element_by_xpath('//*[@id="search-box"]').send_keys(term)
-        aws_xpath = '//div[contains(@class,"dataset") and not(@style="display:none;")]/*/a'
-        aws_elems = browser.find_elements_by_xpath(aws_xpath)
-        for elems in aws_elems:
-            if elems.text != '': #because the site hides links which is not relevant to the search 
-                aws_links.append(elems.get_attribute('href'))
-        self.logger.info("__awsSearch returns {numResults} results".format(numResults = len(aws_links)))
-        return aws_links
+        try:
+            browser.get(link+'/download')
+        except: 
+            self.logger.exception("Error in download function")
+
+    def checkUrl(self):
+        for url in self.urls: 
+            try: 
+                response =  requests.get(url)
+                if response.ok:
+                    self.logger.info('Connection to {urlx} can be established.'.format(urlx = url))
+            except: 
+                    self.logger.error('Connection to {urlx} cannot be established'.format(urlx = url))
+
 
 class downloadData():
     '''Download datasets from the search results'''
@@ -99,12 +104,6 @@ class downloadData():
         '''Identify the datasource e.g. aws or kaggle , to determine the download functions required'''
         pass
     
-    def kaggleDownload():
-        '''Download function for data from kaggle.com'''
-        pass
-
-    def awsDownload():
-        '''Download function for data from aws.com'''
-        pass
+    
 
     
