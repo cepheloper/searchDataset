@@ -1,22 +1,24 @@
 #%% Import libraries 
 import logging  
 import requests
+import os 
 from selenium.webdriver import Firefox
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver import FirefoxProfile
 
 class displaySearch():
     '''Display csv datasets from listed websites based on the search term''' 
-
+s
     def __init__(self, keyword):
         self.logger = self.__initLogger()
         self.keyword = keyword
         self.browser = self.__browserStart()
-        self.initPaths()
-        self.checkUrl()
-
+        
     def retrieveLinks(self):
-        '''Search datasets on different websites. Paths.txt must be filled to utilize the attributes'''
+        '''Search datasets on different websites. 
+        Paths.txt must be filled to utilize the attributes'''
+        urls = self.initPaths()
+        self.checkUrl(urls)
         try: #Add paths to search in the following format 
             self.kgl_info = self.__Search(term = self.keyword, url = self.kgl_url, linksPath = self.kgl_xpath, searchBoxPath = self.kgl_box)
             self.aws_info = self.__Search(term = self.keyword, url = self.aws_url, linksPath = self.aws_xpath, searchBoxPath = self.aws_box)
@@ -24,14 +26,15 @@ class displaySearch():
             self.logger.exception("Error in displaySearch")
         return [*self.kgl_info, *self.aws_info] # Do not forget to return the values after paths are added 
 
-    def initPaths(self):
-        self.urls = []
-        with open("paths.txt", encoding='utf-8') as f:
+    def initPaths(self,filename = r'\paths.txt'):
+        init_urls = []
+        with open(filename, encoding='utf-8') as f:
             for line in f:
                 key, value = line.rstrip("\n").split("***")
                 setattr(self, key, value)
                 if 'url' in key: 
-                    self.urls.append(value)
+                    init_urls.append(value)
+        return init_urls
 
     @staticmethod
     def __initLogger():
@@ -80,8 +83,8 @@ class displaySearch():
         except: 
             self.logger.exception("Error in download function")
 
-    def checkUrl(self):
-        for url in self.urls: 
+    def checkUrl(self,urls):
+        for url in urls: 
             try: 
                 response =  requests.get(url)
                 if response.ok:
