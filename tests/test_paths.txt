@@ -1,0 +1,3 @@
+test_kgl_xpath***//ul/li/a
+test_kgl_url***https://www.kaggle.com/datasets
+test_kgl_box***//input[contains(@class,"MuiInputBase-input")]
