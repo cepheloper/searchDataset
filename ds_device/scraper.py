@@ -5,19 +5,21 @@ import os
 from selenium.webdriver import Firefox
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver import FirefoxProfile
+from pathlib import Path
 
 class displaySearch():
     '''Display csv datasets from listed websites based on the search term''' 
-s
+
     def __init__(self, keyword):
         self.logger = self.__initLogger()
         self.keyword = keyword
         self.browser = self.__browserStart()
+        self.folderdir = Path(__file__).parents[1]
         
-    def retrieveLinks(self):
+    def retrieveLinks(self, pathstxt):
         '''Search datasets on different websites. 
-        Paths.txt must be filled to utilize the attributes'''
-        urls = self.initPaths()
+        Paths.txt must be filled to utilize the objects and the search function'''
+        urls = self.initPaths(pathstxt)
         self.checkUrl(urls)
         try: #Add paths to search in the following format 
             self.kgl_info = self.__Search(term = self.keyword, url = self.kgl_url, linksPath = self.kgl_xpath, searchBoxPath = self.kgl_box)
@@ -26,9 +28,10 @@ s
             self.logger.exception("Error in displaySearch")
         return [*self.kgl_info, *self.aws_info] # Do not forget to return the values after paths are added 
 
-    def initPaths(self,filename = r'\paths.txt'):
+    def initPaths(self,filename):
+        filepath = (self.folderdir/filename).resolve()
         init_urls = []
-        with open(filename, encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             for line in f:
                 key, value = line.rstrip("\n").split("***")
                 setattr(self, key, value)
